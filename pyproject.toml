@@ -9,6 +9,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-benchmark>=4.0"]
+embeddings = ["sentence-transformers>=3.0"]
 
 [build-system]
 requires = ["uv_build>=0.9.17,<0.10.0"]
