@@ -1,13 +1,13 @@
-# agentmemory
+# membox
 
 **Production-grade plug-and-play memory for AI agents.**
 
 Give any LLM, agent, or rule-based system persistent episodic + semantic memory. Zero config, single-file storage, framework-agnostic.
 
 ```python
-from agentmemory import AgentMemory
+from membox import Membox
 
-memory = AgentMemory("my_agent.db")
+memory = Membox("my_agent.db")
 memory.record("User said they love hiking in the Himalayas", importance=0.8)
 memory.learn("user", "prefers", "black coffee", confidence=0.9)
 
@@ -23,12 +23,19 @@ context = memory.context("what does the user like?")
 
 | Feature | Description |
 |---|---|
-| **Episodic memory** | Timestamped events with importance scoring |
+| **Episodic memory** | Timestamped events with importance + emotion scoring |
 | **Semantic memory** | Fact triples with reinforcement & contradiction |
-| **Smart retrieval** | Recency × relevance × importance scoring |
-| **Context builder** | Token-budgeted prompt-ready strings |
+| **Procedural memory** | Trigger → action routines, surfaced in context |
+| **Temporal facts** | `valid_from` / `valid_until` windows + recurrence patterns |
+| **Reflection** | Synthesizes higher-order patterns across episodes |
+| **Smart retrieval** | Recency × relevance × importance (keyword or embeddings) |
+| **Context builder** | Token-budgeted prompt string: profile + procedures + memories + patterns |
+| **Thread summarization** | pi-style compaction of long conversation threads |
 | **Consolidation** | Compress episodes → stable facts |
 | **Forgetting** | Importance-weighted decay (trivial memories die, critical ones survive) |
+| **Editing & correction** | In-place episode edits + timestamped annotation audit trail |
+| **Multi-user isolation** | `owner_id` scoping — one DB, many users, no cross-contamination |
+| **Embeddings** *(optional)* | SQLite-backed semantic retrieval via `sentence-transformers` |
 | **Zero dependencies** | Core runs on Python stdlib only (SQLite) |
 | **Single-file storage** | One `.db` file = entire memory. Copy it, back it up, version it. |
 
@@ -36,20 +43,21 @@ context = memory.context("what does the user like?")
 
 ```bash
 # From source (development)
-git clone <repo-url> && cd agentmemory
+git clone <repo-url> && cd membox
 uv sync --extra dev
 
-# Coming soon: pip install agentmemory
+# Coming soon: pip install membox
 ```
 
 ## Quick Start
+> Want to *run* these examples in a browser? Open [`notebooks/quickstart.ipynb`](notebooks/quickstart.ipynb) — a 5-minute executable version of everything below. For the full simple→advanced tour, see [`notebooks/walkthrough.ipynb`](notebooks/walkthrough.ipynb).
 
 ### 1. Record Events
 
 ```python
-from agentmemory import AgentMemory
+from membox import Membox
 
-memory = AgentMemory("jarvis.db")
+memory = Membox("jarvis.db")
 
 # Record what happens
 memory.record("User got promoted to Director of Engineering!", importance=1.0, emotion="ecstatic")
@@ -98,6 +106,8 @@ print(context)
 # ## Relevant Memories
 # - (2h ago) User ordered black coffee
 # - (1d ago [ecstatic]) User got promoted to Director of Engineering!
+# (when procedures or reflections exist, `## Active Procedures` and `## Patterns`
+#  sections are added too)
 
 # Plug into any LLM:
 messages = [
@@ -111,11 +121,17 @@ messages = [
 
 ```python
 # Compress old episodes into semantic facts
-memory.consolidate()
+memory.consolidate()        # one batch; use consolidate_all() to drain the backlog
 
-# Prune stale memories (importance-weighted)
+# Synthesize higher-order patterns across episodes
+memory.reflect()
+
+# Prune stale memories (importance-weighted; critical ones survive)
 result = memory.forget()
 print(f"Deleted: {result['deleted']}, Archived: {result['archived']}")
+
+# …or run all of the above in one call:
+memory.maintain()
 
 # Health check
 print(memory.stats())
@@ -124,7 +140,7 @@ print(memory.stats())
 ## Configuration
 
 ```python
-from agentmemory import AgentMemory, MemoryConfig
+from membox import Membox, MemoryConfig
 
 # Custom config
 config = MemoryConfig(
@@ -134,11 +150,11 @@ config = MemoryConfig(
     w_importance=0.3,         # Retrieval weight: stored importance
     max_context_tokens=2000,  # Token budget for context()
 )
-memory = AgentMemory("agent.db", config=config)
+memory = Membox("agent.db", config=config)
 
 # Or use presets:
-fast_memory = AgentMemory("chatbot.db", config=MemoryConfig.fast())    # Aggressive forgetting
-deep_memory = AgentMemory("assistant.db", config=MemoryConfig.deep())  # Long retention
+fast_memory = Membox("chatbot.db", config=MemoryConfig.fast())    # Aggressive forgetting
+deep_memory = Membox("assistant.db", config=MemoryConfig.deep())  # Long retention
 ```
 
 ## Integration Examples
@@ -147,10 +163,10 @@ deep_memory = AgentMemory("assistant.db", config=MemoryConfig.deep())  # Long re
 
 ```python
 from openai import OpenAI
-from agentmemory import AgentMemory
+from membox import Membox
 
 client = OpenAI()
-memory = AgentMemory("openai_agent.db")
+memory = Membox("openai_agent.db")
 
 def chat(user_message: str) -> str:
     # Store the user message
@@ -176,10 +192,10 @@ def chat(user_message: str) -> str:
 
 ```python
 import anthropic
-from agentmemory import AgentMemory
+from membox import Membox
 
 client = anthropic.Anthropic()
-memory = AgentMemory("claude_agent.db")
+memory = Membox("claude_agent.db")
 
 def chat(user_message: str) -> str:
     memory.record(f"User: {user_message}")
@@ -199,9 +215,9 @@ def chat(user_message: str) -> str:
 ### With Any Agent Framework
 
 ```python
-from agentmemory import AgentMemory
+from membox import Membox
 
-memory = AgentMemory("agent.db")
+memory = Membox("agent.db")
 
 # In your agent's observe/act loop:
 def agent_step(observation: str) -> str:
@@ -226,7 +242,7 @@ def agent_step(observation: str) -> str:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      AgentMemory                            │
+│                      Membox                            │
 │                                                              │
 │  record()  recall()  learn()  context()  consolidate()      │
 │     │         │        │         │            │              │
@@ -247,18 +263,34 @@ def agent_step(observation: str) -> str:
 
 ## API Reference
 
-| Method | Description | Returns |
+Grouped by memory type. All methods are on `Membox`.
+
+| Category | Method | Returns |
 |---|---|---|
-| `record(content, importance, emotion, source)` | Store an episodic event | `Episode` |
-| `recall(query, k)` | Retrieve top-k relevant memories | `list[RetrievalResult]` |
-| `learn(subject, predicate, obj, confidence)` | Learn a semantic fact | `(Fact, action)` |
-| `about(subject)` | Get all facts about a subject | `list[Fact]` |
-| `context(query, max_tokens)` | Build prompt-ready context string | `str` |
-| `consolidate()` | Compress episodes → facts | `dict` |
-| `forget()` | Prune stale memories | `dict` |
-| `stats()` | Health check | `dict` |
-| `recent(n)` | Get N most recent episodes | `list[Episode]` |
-| `search(keyword)` | Keyword search in episodes | `list[Episode]` |
+| Episodic | `record(content, importance, emotion, source, context, thread_id, parent_id, depth)` | `Episode` |
+| Episodic | `recall(query, k, min_score)` | `list[RetrievalResult]` |
+| Episodic | `recent(n)` | `list[Episode]` |
+| Episodic | `search(keyword, limit)` | `list[Episode]` |
+| Threads | `thread(thread_id, limit)` | `list[Episode]` |
+| Threads | `thread_children(episode_id, limit)` | `list[Episode]` |
+| Threads | `threads(limit)` | `list[str]` |
+| Threads | `summarize_thread(thread_id)` | `ThreadSummaryResult` |
+| Semantic | `learn(subject, predicate, obj, confidence, valid_from, valid_until, recurrence)` | `(Fact, action)` |
+| Semantic | `about(subject, at_time)` | `list[Fact]` |
+| Semantic | `find_fact(subject, predicate, at_time)` | `list[Fact]` |
+| Procedural | `learn_procedure(trigger, action, confidence)` | `Procedure` |
+| Procedural | `match_procedures(text)` | `list[Procedure]` |
+| Procedural | `procedures()` / `delete_procedure(id)` | `list[Procedure]` / `bool` |
+| Context | `context(query, max_tokens, min_score, profile_subject)` | `str` |
+| Maintenance | `consolidate()` / `consolidate_all()` | `dict` |
+| Maintenance | `reflect(episodes)` / `reflections(subject)` | `dict` / `list` |
+| Maintenance | `forget()` | `dict` |
+| Maintenance | `maintain()` — runs consolidate → reflect → summarize → forget | `dict` |
+| Editing | `update_episode(id, ...)` / `annotate_episode(id, ...)` | `Episode` |
+| Editing | `edit_fact(id, ...)` / `correct_fact(id, ...)` | `Fact` / `(Fact, action)` |
+| Lifecycle | `stats()` / `close()` | `dict` / `None` |
+
+`learn()`'s `action` is `'new'` / `'reinforced'` / `'contradicted'`. Retrieval scores combine as `w_recency·R + w_relevance·V + w_importance·I` (see [`notebooks/walkthrough.ipynb`](notebooks/walkthrough.ipynb) §5).
 
 ## Design Decisions
 
@@ -267,7 +299,7 @@ def agent_step(observation: str) -> str:
 | **SQLite, not Postgres** | Zero config, ~0.05ms reads, single-file backup. Handles 18M rows (10yr heavy use). |
 | **Stdlib only** | No supply-chain risk. Embedding search is an optional extra. |
 | **Sync API** | Lowest latency path. SQLite calls are <1ms — async overhead isn't worth it. |
-| **`BaseStore` protocol** | Anyone can swap in Postgres/Redis by implementing 5 methods. |
+| **Store protocols** | `EpisodicStoreProtocol` / `SemanticStoreProtocol` — swap in Postgres/Redis by implementing the protocol. |
 | **Tiered forgetting** | Critical memories (importance ≥ 0.9) never die. Trivial ones fade in days. |
 
 ## Development
@@ -276,7 +308,7 @@ def agent_step(observation: str) -> str:
 # Install dev deps
 uv sync --extra dev
 
-# Run tests (129 tests, ~1s)
+# Run tests (262 passed, 19 skipped, ~1.5s)
 uv run pytest
 
 # Run with verbose output
@@ -285,6 +317,18 @@ uv run pytest -v
 # Run scale tests only
 uv run pytest tests/test_episodic.py::TestEpisodicScale -v
 ```
+
+## Documentation
+
+| Doc | What it's for |
+|---|---|
+| **README.md** *(this file)* | Front door: features, install, quick start, API, design |
+| [`notebooks/`](notebooks) | Runnable examples — `quickstart.ipynb` (5-min) and `walkthrough.ipynb` (simple→advanced) |
+| [`CHANGELOG.md`](CHANGELOG.md) | History of changes, release by release |
+| [`BUGS.md`](BUGS.md) | Known-issues tracker — audit with severity, status, and fix notes |
+| [`lessons/`](lessons) | 8 incremental teaching scripts that build the library from scratch |
+| [`demos/`](demos) | `demo_openrouter.py` — live end-to-end run with a real LLM |
+| [`integrations/pi/`](integrations/pi) | Long-term memory for [pi](https://github.com/earendil-works/pi-mono): HTTP sidecar + TypeScript extension |
 
 ## License
 

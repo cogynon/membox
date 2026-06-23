@@ -36,6 +36,11 @@ class Episode:
     context: dict = field(default_factory=dict)
     consolidated: bool = False
     access_count: int = 0
+    thread_id: str | None = None
+    parent_id: str | None = None
+    depth: int = 0
+    archived: bool = False
+    owner_id: str = "default"
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
 
     def to_dict(self) -> dict:
@@ -50,11 +55,18 @@ class Episode:
             "context": json.dumps(self.context),
             "consolidated": int(self.consolidated),
             "access_count": self.access_count,
+            "thread_id": self.thread_id,
+            "parent_id": self.parent_id,
+            "depth": self.depth,
+            "archived": int(self.archived),
+            "owner_id": self.owner_id,
         }
 
     @classmethod
     def from_dict(cls, d: dict) -> Episode:
-        """Deserialize from a dict (e.g., a sqlite3.Row)."""
+        """Deserialize from a dict or sqlite3.Row."""
+        if hasattr(d, "keys"):
+            d = dict(d)
         return cls(
             id=d["id"],
             content=d["content"],
@@ -65,6 +77,11 @@ class Episode:
             context=json.loads(d["context"]) if isinstance(d["context"], str) else d["context"],
             consolidated=bool(d["consolidated"]),
             access_count=d["access_count"],
+            thread_id=d.get("thread_id"),
+            parent_id=d.get("parent_id"),
+            depth=d.get("depth", 0),
+            archived=bool(d["archived"]) if d.get("archived") is not None else False,
+            owner_id=d.get("owner_id", "default"),
         )
 
 
@@ -95,6 +112,10 @@ class Fact:
     first_observed: datetime = field(default_factory=datetime.now)
     last_updated: datetime = field(default_factory=datetime.now)
     is_active: bool = True
+    valid_from: datetime | None = None
+    valid_until: datetime | None = None
+    recurrence: str | None = None
+    owner_id: str = "default"
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
 
     def to_dict(self) -> dict:
@@ -108,10 +129,16 @@ class Fact:
             "first_observed": self.first_observed.isoformat(),
             "last_updated": self.last_updated.isoformat(),
             "is_active": int(self.is_active),
+            "valid_from": self.valid_from.isoformat() if self.valid_from else None,
+            "valid_until": self.valid_until.isoformat() if self.valid_until else None,
+            "recurrence": self.recurrence,
+            "owner_id": self.owner_id,
         }
 
     @classmethod
     def from_dict(cls, d: dict) -> Fact:
+        if hasattr(d, "keys"):
+            d = dict(d)
         return cls(
             id=d["id"],
             subject=d["subject"],
@@ -126,10 +153,53 @@ class Fact:
             first_observed=datetime.fromisoformat(d["first_observed"]),
             last_updated=datetime.fromisoformat(d["last_updated"]),
             is_active=bool(d["is_active"]),
+            valid_from=datetime.fromisoformat(d["valid_from"]) if d.get("valid_from") else None,
+            valid_until=datetime.fromisoformat(d["valid_until"]) if d.get("valid_until") else None,
+            recurrence=d.get("recurrence"),
+            owner_id=d.get("owner_id", "default"),
         )
 
     def __repr__(self) -> str:
         return f"Fact({self.subject} → {self.predicate} → {self.object}, conf={self.confidence:.0%})"
+
+
+@dataclass(slots=True)
+class Procedure:
+    """A procedural rule: when trigger, do action."""
+
+    trigger: str
+    action: str
+    confidence: float = 0.5
+    owner_id: str = "default"
+    metadata: dict = field(default_factory=dict)
+    created_at: datetime = field(default_factory=datetime.now)
+    id: str = field(default_factory=lambda: uuid.uuid4().hex[:16])
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "trigger": self.trigger,
+            "action": self.action,
+            "confidence": self.confidence,
+            "owner_id": self.owner_id,
+            "created_at": self.created_at.isoformat(),
+            "metadata": json.dumps(self.metadata),
+        }
+
+    @classmethod
+    def from_row(cls, d: dict) -> "Procedure":
+        if hasattr(d, "keys"):
+            d = dict(d)
+        created_at = d.get("created_at")
+        return cls(
+            id=d["id"],
+            trigger=d["trigger"],
+            action=d["action"],
+            confidence=d["confidence"],
+            owner_id=d.get("owner_id", "default"),
+            metadata=json.loads(d["metadata"]) if isinstance(d["metadata"], str) else d["metadata"],
+            created_at=datetime.fromisoformat(created_at) if created_at else datetime.now(),
+        )
 
 
 @dataclass(slots=True)

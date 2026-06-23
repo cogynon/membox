@@ -1,11 +1,11 @@
-"""Integration & E2E tests for AgentMemory facade."""
+"""Integration & E2E tests for Membox facade."""
 
 import time
 from datetime import datetime, timedelta
 
 import pytest
 
-from agentmemory import AgentMemory, MemoryConfig, Episode, Fact
+from membox import Membox, MemoryConfig, Episode, Fact
 
 
 NOW = datetime(2026, 3, 25, 12, 0, 0)
@@ -13,30 +13,30 @@ NOW = datetime(2026, 3, 25, 12, 0, 0)
 
 # ── Basic API ──────────────────────────────────────────────────────
 
-class TestAgentMemoryBasic:
+class TestMemboxBasic:
 
     def test_three_line_usage(self):
         """The 3-line promise: init, record, recall."""
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("User loves hiking in the Himalayas", importance=0.8)
         results = m.recall("hiking", k=1, now=NOW)
         assert len(results) >= 1
         assert "hiking" in results[0].episode.content
 
     def test_record_returns_episode(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         ep = m.record("hello", importance=0.7, emotion="happy")
         assert isinstance(ep, Episode)
         assert ep.importance == 0.7
         assert ep.emotion == "happy"
 
     def test_recall_empty(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         results = m.recall("anything", now=NOW)
         assert results == []
 
     def test_recent(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("a", timestamp=NOW - timedelta(hours=2))
         m.record("b", timestamp=NOW - timedelta(hours=1))
         m.record("c", timestamp=NOW)
@@ -45,7 +45,7 @@ class TestAgentMemoryBasic:
         assert recent[0].content == "c"
 
     def test_search(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("User ordered black coffee")
         m.record("User went for a run")
         results = m.search("coffee")
@@ -54,10 +54,10 @@ class TestAgentMemoryBasic:
 
 # ── Semantic: learn + about ────────────────────────────────────────
 
-class TestAgentMemorySemantic:
+class TestMemboxSemantic:
 
     def test_learn_and_about(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         fact, action = m.learn("user", "prefers", "coffee", confidence=0.9)
         assert action == "new"
         facts = m.about("user")
@@ -65,14 +65,14 @@ class TestAgentMemorySemantic:
         assert facts[0].object == "coffee"
 
     def test_reinforce(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.learn("user", "prefers", "coffee", confidence=0.5)
         fact, action = m.learn("user", "prefers", "coffee")
         assert action == "reinforced"
         assert fact.confidence > 0.5
 
     def test_contradict(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.learn("user", "lives_in", "Delhi")
         fact, action = m.learn("user", "lives_in", "Mumbai")
         assert action == "contradicted"
@@ -81,7 +81,7 @@ class TestAgentMemorySemantic:
         assert facts[0].object == "Mumbai"
 
     def test_find_fact(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.learn("user", "name", "Pranav")
         m.learn("user", "prefers", "coffee")
         facts = m.find_fact("user", "name")
@@ -91,24 +91,24 @@ class TestAgentMemorySemantic:
 
 # ── Context builder ────────────────────────────────────────────────
 
-class TestAgentMemoryContext:
+class TestMemboxContext:
 
     def test_context_includes_facts(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.learn("user", "prefers", "coffee", confidence=0.9)
         ctx = m.context("what does the user like?", now=NOW)
         assert "coffee" in ctx
         assert "User Profile" in ctx
 
     def test_context_includes_memories(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("User went hiking in the Himalayas", importance=0.8,
                  timestamp=NOW - timedelta(hours=2))
         ctx = m.context("hiking", now=NOW)
         assert "hiking" in ctx.lower()
 
     def test_context_respects_token_budget(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         for i in range(50):
             m.record(f"Episode {i} about a very long topic " * 10,
                      timestamp=NOW - timedelta(hours=i))
@@ -117,17 +117,17 @@ class TestAgentMemoryContext:
         assert len(ctx) // 4 < 300  # Some overhead is OK
 
     def test_context_empty(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         ctx = m.context("anything", now=NOW)
         assert ctx == ""
 
 
 # ── Consolidation ──────────────────────────────────────────────────
 
-class TestAgentMemoryConsolidate:
+class TestMemboxConsolidate:
 
     def test_consolidate(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("User said: I prefer green tea",
                  timestamp=NOW - timedelta(hours=2))
         result = m.consolidate(now=NOW)
@@ -135,17 +135,17 @@ class TestAgentMemoryConsolidate:
         assert result["facts_extracted"] >= 1
 
     def test_consolidate_empty(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         result = m.consolidate(now=NOW)
         assert result["episodes_processed"] == 0
 
 
 # ── Forgetting ─────────────────────────────────────────────────────
 
-class TestAgentMemoryForget:
+class TestMemboxForget:
 
     def test_forget_removes_old_trivial(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("old trivial", importance=0.1,
                  timestamp=NOW - timedelta(days=30))
         m.record("important", importance=0.95,
@@ -154,7 +154,7 @@ class TestAgentMemoryForget:
         assert result["deleted"] >= 1
 
     def test_forget_keeps_important(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("critical event", importance=0.95,
                  timestamp=NOW - timedelta(days=5))
         result = m.forget(now=NOW)
@@ -163,10 +163,10 @@ class TestAgentMemoryForget:
 
 # ── Stats ──────────────────────────────────────────────────────────
 
-class TestAgentMemoryStats:
+class TestMemboxStats:
 
     def test_stats_structure(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("test")
         m.learn("user", "name", "X")
         s = m.stats()
@@ -178,17 +178,17 @@ class TestAgentMemoryStats:
 
 # ── Config presets ─────────────────────────────────────────────────
 
-class TestAgentMemoryConfig:
+class TestMemboxConfig:
 
     def test_fast_preset(self):
-        m = AgentMemory(":memory:", config=MemoryConfig.fast())
+        m = Membox(":memory:", config=MemoryConfig.fast())
         m.record("test", importance=0.1,
                  timestamp=NOW - timedelta(days=5))
         result = m.forget(now=NOW)
         assert result["deleted"] >= 1
 
     def test_deep_preset(self):
-        m = AgentMemory(":memory:", config=MemoryConfig.deep())
+        m = Membox(":memory:", config=MemoryConfig.deep())
         m.record("test", importance=0.1,
                  timestamp=NOW - timedelta(days=5))
         result = m.forget(now=NOW)
@@ -197,25 +197,25 @@ class TestAgentMemoryConfig:
 
 # ── Context manager ────────────────────────────────────────────────
 
-class TestAgentMemoryLifecycle:
+class TestMemboxLifecycle:
 
     def test_context_manager(self):
-        with AgentMemory(":memory:") as m:
+        with Membox(":memory:") as m:
             m.record("inside")
             assert m.recall("inside", k=1, now=NOW)
 
     def test_repr(self):
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         m.record("x")
         assert "episodes=1" in repr(m)
 
     def test_persistence(self, tmp_db):
-        m1 = AgentMemory(tmp_db)
+        m1 = Membox(tmp_db)
         m1.record("persistent data", importance=0.9)
         m1.learn("user", "name", "Test")
         m1.close()
 
-        m2 = AgentMemory(tmp_db)
+        m2 = Membox(tmp_db)
         assert m2.recent(1)[0].content == "persistent data"
         assert m2.about("user")[0].object == "Test"
         m2.close()
@@ -223,11 +223,11 @@ class TestAgentMemoryLifecycle:
 
 # ── E2E full loop ──────────────────────────────────────────────────
 
-class TestAgentMemoryE2E:
+class TestMemboxE2E:
 
     def test_full_lifecycle(self):
         """End-to-end: record → learn → recall → context → consolidate → forget → stats."""
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
 
         # Record episodes
         m.record("User said: I prefer black coffee", importance=0.6,
@@ -265,11 +265,11 @@ class TestAgentMemoryE2E:
 
 # ── Scale test ─────────────────────────────────────────────────────
 
-class TestAgentMemoryScale:
+class TestMemboxScale:
 
     def test_recall_latency_at_scale(self):
         """1000 episodes, recall should complete in < 100ms."""
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         for i in range(1000):
             m.record(f"event {i} about topic-{i % 20}",
                      importance=(i % 10) / 10,
@@ -285,7 +285,7 @@ class TestAgentMemoryScale:
 
     def test_context_latency(self):
         """Context generation should be fast."""
-        m = AgentMemory(":memory:")
+        m = Membox(":memory:")
         for i in range(100):
             m.record(f"event {i}", timestamp=NOW - timedelta(hours=i))
         m.learn("user", "name", "Test")

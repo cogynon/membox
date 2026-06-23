@@ -10,9 +10,12 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 
-from agentmemory.config import MemoryConfig
-from agentmemory.episodic import EpisodicStore
-from agentmemory.models import Episode
+from membox.config import MemoryConfig
+from membox._store import EpisodicStoreProtocol
+from membox.models import Episode
+
+if False:
+    from membox.embedding_store import EmbeddingStore
 
 
 @dataclass(slots=True)
@@ -59,6 +62,17 @@ def evaluate_episode(episode: Episode, now: datetime,
     age_days = (now - episode.timestamp).total_seconds() / 86400.0
     ret_score = retention_score(episode, now, config)
 
+    # Never delete a thread summary: it is the compacted memory of many
+    # episodes. Deleting it (e.g. right after maintain() creates it) would
+    # silently undo the compaction and lose the thread's narrative.
+    if episode.source == "thread_summary":
+        return ForgetAction(
+            episode_id=episode.id,
+            action="keep",
+            retention_score=ret_score,
+            reason="thread_summary is exempt from forgetting",
+        )
+
     for max_imp, max_age, action in config.forgetting_tiers:
         if episode.importance <= max_imp and age_days > max_age:
             return ForgetAction(
@@ -76,14 +90,21 @@ def evaluate_episode(episode: Episode, now: datetime,
     )
 
 
-def forget(store: EpisodicStore, config: MemoryConfig | None = None,
-           now: datetime | None = None) -> dict:
+def forget(store: EpisodicStoreProtocol, config: MemoryConfig | None = None,
+           now: datetime | None = None,
+           embedding_store: "EmbeddingStore | None" = None) -> dict:
     """Run forgetting pass over all episodes. Returns summary.
 
     Actions:
-    - "delete": permanently removed
+    - "delete": permanently removed (and embedding removed if store provided)
     - "archive": marked as consolidated (soft-archive)
     - "keep": no action
+
+    Args:
+        store: EpisodicStoreProtocol implementation to clean up.
+        config: Forgetting thresholds.
+        now: Reference time for age calculation.
+        embedding_store: Optional EmbeddingStore for cascade deletion.
 
     Returns dict with counts: {"deleted": N, "archived": N, "kept": N, "actions": [...]}
     """
@@ -108,7 +129,11 @@ def forget(store: EpisodicStore, config: MemoryConfig | None = None,
 
     # Execute
     deleted = store.delete(to_delete) if to_delete else 0
-    archived = store.mark_consolidated(to_archive) if to_archive else 0
+    archived = store.mark_archived(to_archive) if to_archive else 0
+
+    # Cascade: delete orphaned embeddings
+    if embedding_store is not None and to_delete:
+        embedding_store.delete(to_delete)
 
     return {
         "deleted": deleted,
