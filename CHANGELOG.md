@@ -7,6 +7,11 @@ Newest entries at the top. See [`BUGS.md`](BUGS.md) for the known-issues tracker
 
 ## Unreleased
 
+### Feature: LLMConsolidator & [llm] extra
+
+- **Added** `LLMConsolidator` class inside `remembox.consolidation` (and exposed in the main namespace) to extract structured facts using any OpenAI-compatible LLM client.
+- **Added** `[llm]` optional extra to `pyproject.toml` containing `openai>=2.29.0` as an optional dependency.
+
 ### Rename: membox → remembox
 
 - **Changed** Renamed the module and class from `membox`/`Membox` to `remembox`/`Remembox` across the entire codebase, including all source code, tests, docs, config, and demos.

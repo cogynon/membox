@@ -1378,7 +1378,7 @@ wheels = [
 
 [[package]]
 name = "remembox"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "." }
 
 [package.optional-dependencies]
@@ -1392,17 +1392,21 @@ dev = [
 embeddings = [
     { name = "sentence-transformers" },
 ]
+llm = [
+    { name = "openai" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=7.3.0" },
     { name = "openai", marker = "extra == 'dev'", specifier = ">=2.29.0" },
+    { name = "openai", marker = "extra == 'llm'", specifier = ">=2.29.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "python-dotenv", marker = "extra == 'dev'", specifier = ">=1.2.2" },
     { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0" },
 ]
-provides-extras = ["dev", "embeddings"]
+provides-extras = ["dev", "embeddings", "llm"]
 
 [[package]]
 name = "rich"

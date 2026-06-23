@@ -42,11 +42,12 @@ context = memory.context("what does the user like?")
 ## Install
 
 ```bash
-# From source (development)
-git clone <repo-url> && cd remembox
-uv sync --extra dev
+# Install core package
+pip install remembox
 
-# Coming soon: pip install remembox
+# Install with optional extras
+pip install "remembox[llm]"         # Installs openai for LLMConsolidator
+pip install "remembox[embeddings]"  # Installs sentence-transformers for semantic search
 ```
 
 ## Quick Start
@@ -236,6 +237,23 @@ def agent_step(observation: str) -> str:
         memory.forget()
 
     return action
+```
+
+### LLM-Based Consolidation
+
+To extract complex facts using an LLM instead of the default rule-based pattern matching:
+
+```python
+from openai import OpenAI
+from remembox import Remembox
+from remembox.consolidation import LLMConsolidator
+
+# 1. Initialize any OpenAI-compatible client
+client = OpenAI(api_key="your-api-key")
+
+# 2. Inject LLM-based consolidator
+consolidator = LLMConsolidator(client, model="gpt-4o-mini")
+memory = Remembox("my_agent.db", consolidator=consolidator)
 ```
 
 ## Architecture

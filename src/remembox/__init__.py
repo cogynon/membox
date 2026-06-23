@@ -8,6 +8,11 @@ from remembox.summarization import (
     Summarizer,
     ThreadSummaryResult,
 )
+from remembox.consolidation import (
+    Consolidator,
+    RuleBasedConsolidator,
+    LLMConsolidator,
+)
 
 __all__ = [
     "Remembox",
@@ -18,6 +23,9 @@ __all__ = [
     "Summarizer",
     "RuleBasedSummarizer",
     "ThreadSummaryResult",
+    "Consolidator",
+    "RuleBasedConsolidator",
+    "LLMConsolidator",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.2.2"
