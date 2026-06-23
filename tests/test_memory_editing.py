@@ -4,13 +4,13 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox import Membox
+from remembox import Remembox
 
 
 @pytest.fixture
 def memory(tmp_path):
     db = tmp_path / "edit.db"
-    m = Membox(str(db))
+    m = Remembox(str(db))
     yield m
     m.close()
 
@@ -122,8 +122,8 @@ class TestFactEditing:
 class TestOwnerIsolationEditing:
     def test_cannot_edit_other_owner_episode(self, tmp_path):
         db = tmp_path / "shared.db"
-        alice = Membox(str(db), owner_id="alice")
-        bob = Membox(str(db), owner_id="bob")
+        alice = Remembox(str(db), owner_id="alice")
+        bob = Remembox(str(db), owner_id="bob")
 
         ep = alice.record("Alice secret")
         assert bob.update_episode(ep.id, content="hacked") is None

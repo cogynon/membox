@@ -10,10 +10,10 @@ import sqlite3
 from datetime import datetime
 from typing import Iterator
 
-from membox.connection import create_connection
-from membox.migrations import migrate
-from membox.models import Episode
-from membox.tokens import escape_like
+from remembox.connection import create_connection
+from remembox.migrations import migrate
+from remembox.models import Episode
+from remembox.tokens import escape_like
 
 # ── Schema ──────────────────────────────────────────────────────────────
 _SCHEMA = """

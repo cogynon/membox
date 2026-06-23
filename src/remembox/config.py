@@ -13,7 +13,7 @@ class MemoryConfig:
     what you need:
 
         config = MemoryConfig(decay_rate=0.05, max_episodes=500_000)
-        memory = Membox("agent.db", config=config)
+        memory = Remembox("agent.db", config=config)
 
     Or use presets:
 
@@ -60,7 +60,7 @@ class MemoryConfig:
     max_reflections_in_context: int = 5
 
     # ── Importance scoring ────────────────────────────────────────
-    # When True, Membox.auto_score_importance = True and a configured
+    # When True, Remembox.auto_score_importance = True and a configured
     # scorer will automatically rate importance on record().
     auto_score_importance: bool = False
 

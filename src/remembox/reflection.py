@@ -15,10 +15,10 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Optional
 
-from membox.connection import create_connection
-from membox.migrations import migrate
-from membox.models import Episode, Fact
-from membox.tokens import tokenize_list
+from remembox.connection import create_connection
+from remembox.migrations import migrate
+from remembox.models import Episode, Fact
+from remembox.tokens import tokenize_list
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS reflections (

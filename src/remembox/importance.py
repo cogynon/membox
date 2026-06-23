@@ -6,11 +6,11 @@ an LLM-based scorer (works with any client providing a chat.completions
 interface, e.g. OpenAI, Anthropic, OpenRouter).
 
 Usage:
-    from membox import Membox
-    from membox.importance import LLMImportanceScorer
+    from remembox import Remembox
+    from remembox.importance import LLMImportanceScorer
 
     scorer = LLMImportanceScorer(client=openai_client)
-    memory = Membox("agent.db", importance_scorer=scorer)
+    memory = Remembox("agent.db", importance_scorer=scorer)
 
     # importance and emotion are inferred automatically
     memory.record("I just got promoted to CEO!")

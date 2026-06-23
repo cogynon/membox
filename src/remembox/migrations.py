@@ -5,7 +5,7 @@ updates add new columns or tables. Each migration is a numbered SQL
 script; the database tracks the current version in a pragma table.
 
 Usage:
-    from membox.migrations import migrate
+    from remembox.migrations import migrate
     migrate(conn)
 
 This is called automatically by each store's __init__ after creating

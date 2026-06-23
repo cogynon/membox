@@ -2,8 +2,8 @@
 
 import pytest
 
-from membox import Membox, MemoryConfig
-from membox.importance import RuleBasedImportanceScorer, LLMImportanceScorer, ScoreResult
+from remembox import Remembox, MemoryConfig
+from remembox.importance import RuleBasedImportanceScorer, LLMImportanceScorer, ScoreResult
 
 
 class TestRuleBasedImportanceScorer:
@@ -88,17 +88,17 @@ class TestLLMImportanceScorer:
         assert result.importance == 0.0
 
 
-class TestMemboxAutoImportance:
+class TestRememboxAutoImportance:
 
     def test_auto_score_with_config(self):
         config = MemoryConfig(auto_score_importance=True)
-        memory = Membox(":memory:", config=config)
+        memory = Remembox(":memory:", config=config)
         ep = memory.record("I just got promoted to CEO today!")
         assert ep.importance >= 0.9
 
     def test_manual_importance_overrides_scorer(self):
         config = MemoryConfig(auto_score_importance=True)
-        memory = Membox(":memory:", config=config)
+        memory = Remembox(":memory:", config=config)
         ep = memory.record("I just got promoted!", importance=0.2)
         assert ep.importance == pytest.approx(0.2, abs=0.01)
 
@@ -107,12 +107,12 @@ class TestMemboxAutoImportance:
             def score(self, content: str) -> ScoreResult:
                 return ScoreResult(importance=0.77, emotion="calm")
 
-        memory = Membox(":memory:", importance_scorer=ConstantScorer())
+        memory = Remembox(":memory:", importance_scorer=ConstantScorer())
         ep = memory.record("anything")
         assert ep.importance == pytest.approx(0.77, abs=0.01)
         assert ep.emotion == "calm"
 
     def test_no_scorer_uses_default(self):
-        memory = Membox(":memory:")
+        memory = Remembox(":memory:")
         ep = memory.record("hello")
         assert ep.importance == pytest.approx(0.5, abs=0.01)

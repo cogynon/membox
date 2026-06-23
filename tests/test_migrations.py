@@ -5,7 +5,7 @@ import tempfile
 
 import pytest
 
-from membox import Membox
+from remembox import Remembox
 
 
 def _create_legacy_database(path: str) -> None:
@@ -51,8 +51,8 @@ class TestMigrations:
 
         _create_legacy_database(path)
 
-        # Opening Membox should run migrations transparently.
-        memory = Membox(path)
+        # Opening Remembox should run migrations transparently.
+        memory = Remembox(path)
 
         # Legacy data still accessible
         recent = memory.recent(5)
@@ -69,7 +69,7 @@ class TestMigrations:
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             path = f.name
 
-        memory = Membox(path)
+        memory = Remembox(path)
         stats = memory.stats()
         assert stats["episodes"]["total"] == 0
         memory.close()
@@ -81,10 +81,10 @@ class TestMigrations:
         _create_legacy_database(path)
 
         # First open runs migration
-        m1 = Membox(path)
+        m1 = Remembox(path)
         m1.close()
 
         # Second open should not crash and should not re-apply
-        m2 = Membox(path)
+        m2 = Remembox(path)
         assert m2._episodic.count() == 1
         m2.close()

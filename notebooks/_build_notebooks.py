@@ -39,7 +39,7 @@ def build(cells: list[dict], path: str) -> None:
 # QUICKSTART
 # ---------------------------------------------------------------------------
 quickstart = [
-    md("""# membox — Quickstart
+    md("""# remembox — Quickstart
 
 **Production-grade plug-and-play memory for AI agents.**
 Zero config, single-file storage, framework-agnostic.
@@ -60,13 +60,13 @@ uv sync --extra dev
 import sys, os
 sys.path.insert(0, os.path.join(os.getcwd(), "src"))
 
-from membox import Membox, MemoryConfig
+from remembox import Remembox, MemoryConfig
 """),
     md("""## 1. Create a memory
 
 One class, one import. Backed by SQLite (WAL mode). State persists across restarts when you point it at a real file path.
 """),
-    code("""memory = Membox(":memory:")  # use "my_agent.db" to persist to disk
+    code("""memory = Remembox(":memory:")  # use "my_agent.db" to persist to disk
 memory"""),
     md("""## 2. Record events (episodic memory)
 
@@ -150,7 +150,7 @@ record → learn → recall → context → [LLM] → record → ... → consoli
 # WALKTHROUGH
 # ---------------------------------------------------------------------------
 walkthrough = [
-    md("""# membox — Detailed Walkthrough (Simple → Advanced)
+    md("""# remembox — Detailed Walkthrough (Simple → Advanced)
 
 A progressive tour of the whole library. Each section builds on the previous one.
 
@@ -180,7 +180,7 @@ A progressive tour of the whole library. Each section builds on the previous one
 sys.path.insert(0, os.path.join(os.getcwd(), "src"))
 
 from datetime import datetime, timedelta
-from membox import Membox, MemoryConfig
+from remembox import Remembox, MemoryConfig
 """),
 
     # 1. Episodic basics ---------------------------------------------------------
@@ -188,7 +188,7 @@ from membox import Membox, MemoryConfig
 
 Episodes are timestamped events with an importance score and optional emotion/source/metadata. This is the raw log of your agent's life.
 """),
-    code("""m = Membox(":memory:")
+    code("""m = Remembox(":memory:")
 
 m.record("User said they love hiking in the Himalayas", importance=0.8, source="conversation")
 m.record("User ordered black coffee", importance=0.3, emotion="calm", source="order")
@@ -211,9 +211,9 @@ Importance (0.0–1.0) drives two things: **retrieval ranking** and **forgetting
 | Rule-based auto | `MemoryConfig(auto_score_importance=True)` |
 | LLM auto | inject an `LLMImportanceScorer` (see §17) |
 """),
-    code("""from membox.importance import RuleBasedImportanceScorer
+    code("""from remembox.importance import RuleBasedImportanceScorer
 
-auto = Membox(":memory:", config=MemoryConfig(auto_score_importance=True))
+auto = Remembox(":memory:", config=MemoryConfig(auto_score_importance=True))
 ep = auto.record("I just got promoted to Director of Engineering!")
 print(f"auto-scored  -> importance={ep.importance:.2f} emotion={ep.emotion}")
 
@@ -232,7 +232,7 @@ Facts are `(subject, predicate, object)` triples with a confidence score. `learn
 | `reinforced` | Same triple seen again | Confidence rises toward 1.0 |
 | `contradicted` | Same subject+predicate, new object | Old fact deactivated, new one active |
 """),
-    code("""s = Membox(":memory:")
+    code("""s = Remembox(":memory:")
 
 print(s.learn("user", "name",    "Pranav",      confidence=0.95)[1])      # new
 print(s.learn("user", "prefers", "black coffee", confidence=0.9)[1])     # new
@@ -250,7 +250,7 @@ for f in s.about("user"):
 
 Facts can have a **validity window** (`valid_from` / `valid_until`) and a **recurrence** pattern. `about(subject, at_time=...)` returns only facts that were true at that moment.
 """),
-    code("""t = Membox(":memory:")
+    code("""t = Remembox(":memory:")
 
 t.learn("user", "travels_to", "Tokyo",
         valid_from=datetime(2026, 7, 1), valid_until=datetime(2026, 7, 10),
@@ -280,7 +280,7 @@ score = w_recency * R   +   w_relevance * V   +   w_importance * I
 
 Each `RetrievalResult` exposes the breakdown so you can debug rankings.
 """),
-    code("""r = Membox(":memory:", config=MemoryConfig(w_recency=0.3, w_relevance=0.4, w_importance=0.3))
+    code("""r = Remembox(":memory:", config=MemoryConfig(w_recency=0.3, w_relevance=0.4, w_importance=0.3))
 
 # Record at different importances
 r.record("User loves hiking in the Himalayas", importance=0.9)
@@ -307,7 +307,7 @@ print("\\nWith min_score=0.6:",
 
 Paste the return value into your system prompt. That's the entire integration.
 """),
-    code("""c = Membox(":memory:")
+    code("""c = Remembox(":memory:")
 c.learn("user", "prefers", "black coffee", confidence=0.9)
 c.learn("user", "name", "Pranav", confidence=0.95)
 c.record("User got promoted to Director!", importance=1.0, emotion="ecstatic")
@@ -321,7 +321,7 @@ print(c.context("what does the user like?", max_tokens=500))
 
 Procedures are if-then rules: *when trigger matches, do action*. They show up in the context's **Active Procedures** section so the LLM can act on them.
 """),
-    code("""p = Membox(":memory:")
+    code("""p = Remembox(":memory:")
 p.learn_procedure("goodnight", "dim the lights and lock the door", confidence=0.9)
 p.learn_procedure("meeting starts", "mute notifications and open the agenda", confidence=0.8)
 
@@ -335,7 +335,7 @@ print(p.context("goodnight"))
 
 Episodes can be grouped into a `thread_id` and nested via `parent_id`/`depth`. Long threads get compressed with `summarize_thread()` (pi-style compaction): older messages fold into one summary episode, recent ones stay verbatim.
 """),
-    code("""th = Membox(":memory:")
+    code("""th = Remembox(":memory:")
 
 # A short thread
 th.record("Hi, I need help with a Python bug", thread_id="t1")
@@ -359,7 +359,7 @@ print("summary preview:", (result.summary_episode.content[:80] + "...") if resul
 
 Episodes must be older than `consolidation_min_age_hours` (default 1h) to be eligible.
 """),
-    code("""con = Membox(":memory:")
+    code("""con = Remembox(":memory:")
 con.record("I love black coffee", importance=0.7)
 con.record("I live in Mumbai", importance=0.6)
 con.record("the weather is nice today", importance=0.2)  # no pattern → no fact
@@ -378,7 +378,7 @@ for f in con.about("user"):
 
 `reflect()` looks across many episodes and surfaces recurring patterns (e.g. *"user frequently mentions coffee"*). These feed the **Patterns** section of the context. Run it explicitly or enable `auto_reflect` in config.
 """),
-    code("""ref = Membox(":memory:")
+    code("""ref = Remembox(":memory:")
 for _ in range(4):
     ref.record("User is stressed about the deadline again")
 
@@ -393,7 +393,7 @@ for r in result["reflections"]:
 
 `forget()` walks every episode and applies importance-tiered rules. Trivial memories fade in days; critical ones (importance ≥ 0.9) effectively never die. Actions are `delete`, `archive`, or `keep`.
 """),
-    code("""fg = Membox(":memory:")
+    code("""fg = Remembox(":memory:")
 
 # A trivial old memory vs. a critical old memory
 fg.record("User said 'lol'", importance=0.1, timestamp=datetime.now() - timedelta(days=30))
@@ -410,7 +410,7 @@ for a in result["actions"]:
 
 Runs consolidation → reflection → thread summarization → forgetting in dependency order. Call it periodically (e.g. after every N turns) so you don't have to orchestrate each step.
 """),
-    code("""mt = Membox(":memory:")
+    code("""mt = Remembox(":memory:")
 for _ in range(3):
     mt.record("I love black coffee")
 for i in range(6):
@@ -433,13 +433,13 @@ Every knob lives in `MemoryConfig`. Override what you need, or use a preset:
 | `MemoryConfig.fast()` | Chatbots | aggressive forgetting, small context |
 | `MemoryConfig.deep()` | Personal assistants | long retention, embeddings on |
 """),
-    code("""fast = Membox(":memory:", config=MemoryConfig.fast())
-deep = Membox(":memory:", config=MemoryConfig.deep())
+    code("""fast = Remembox(":memory:", config=MemoryConfig.fast())
+deep = Remembox(":memory:", config=MemoryConfig.deep())
 
 # Custom: emphasise relevance, forget slowly
 custom = MemoryConfig(decay_rate=0.005, w_relevance=0.6, w_recency=0.2, w_importance=0.2,
                       max_context_tokens=4000)
-cust = Membox(":memory:", config=custom)
+cust = Remembox(":memory:", config=custom)
 print("fast decay:", fast._config.decay_rate)
 print("deep decay:", deep._config.decay_rate)
 print("custom weights: R V I =", cust._config.w_recency, cust._config.w_relevance, cust._config.w_importance)
@@ -453,7 +453,7 @@ Mistakes happen. You can:
 - `annotate_episode()` — append a timestamped correction/note (audit trail, original intact)
 - `edit_fact()` / `correct_fact()` — fix or supersede a fact
 """),
-    code("""ed = Membox(":memory:")
+    code("""ed = Remembox(":memory:")
 ep = ed.record("User lives in Paris")
 
 updated = ed.update_episode(ep.id, content="User lives in Lyon", importance=0.8)
@@ -476,8 +476,8 @@ Pass `owner_id` to partition memory per user/agent. Each owner only sees its own
     code("""import tempfile, os
 db = os.path.join(tempfile.mkdtemp(), "multi.db")
 
-alice = Membox(db, owner_id="alice")
-bob   = Membox(db, owner_id="bob")
+alice = Remembox(db, owner_id="alice")
+bob   = Remembox(db, owner_id="bob")
 
 alice.record("Alice loves rock climbing", importance=0.8)
 bob.record("Bob prefers baking", importance=0.6)
@@ -496,11 +496,11 @@ Keyword overlap misses synonyms ("hiking" vs "outdoor activities"). Enable an em
 uv sync --extra embeddings
 ```
 
-Set `embedding_model_name` in config and `Membox` will persist embeddings in SQLite and use them in `recall()` / `context()`. Hybrid scoring blends embeddings with keyword overlap via `w_embedding` / `w_keyword`.
+Set `embedding_model_name` in config and `Remembox` will persist embeddings in SQLite and use them in `recall()` / `context()`. Hybrid scoring blends embeddings with keyword overlap via `w_embedding` / `w_keyword`.
 """),
     code("""try:
     cfg = MemoryConfig(embedding_model_name="all-MiniLM-L6-v2")
-    em = Membox(":memory:", config=cfg)
+    em = Remembox(":memory:", config=cfg)
     em.record("I enjoy long walks in the mountains", importance=0.7)
     em.record("I love debugging Python code", importance=0.5)
 
@@ -515,18 +515,18 @@ except ImportError as e:
     # 17. LLM integration --------------------------------------------------------
     md("""## 17. LLM integration — the full loop
 
-Two extension points connect `membox` to a real LLM:
+Two extension points connect `remembox` to a real LLM:
 
 1. **`LLMImportanceScorer`** — infer importance + emotion on every `record()` (works with any OpenAI-compatible client).
 2. **The chat loop** — `record` → `context` → `LLM` → `record`. Framework-agnostic.
 
 Below is a self-contained example using the rule-based scorer (no API key needed). Swap in `LLMImportanceScorer(client, model=...)` and a real client to go live.
 """),
-    code("""from membox.importance import RuleBasedImportanceScorer
+    code("""from remembox.importance import RuleBasedImportanceScorer
 
 # 1) Auto importance via the rule-based scorer (no API key)
 scorer = RuleBasedImportanceScorer()
-agent = Membox(":memory:", config=MemoryConfig(auto_score_importance=True))
+agent = Remembox(":memory:", config=MemoryConfig(auto_score_importance=True))
 
 # Pre-seed some preferences
 agent.learn("user", "name", "Pranav", confidence=0.95)
@@ -568,7 +568,7 @@ print("\\nfinal memory:\\n", agent.context("who is the user?"))
 | Edit an episode | `memory.update_episode(id, ...)`, `annotate_episode(id, ...)` |
 | Fix a fact | `memory.edit_fact(id, ...)`, `correct_fact(id, ...)` |
 | Health check | `memory.stats()` |
-| Per-user isolation | `Membox(db, owner_id="alice")` |
+| Per-user isolation | `Remembox(db, owner_id="alice")` |
 | Semantic retrieval | `MemoryConfig(embedding_model_name="all-MiniLM-L6-v2")` |
 | Auto importance | `MemoryConfig(auto_score_importance=True)` or `LLMImportanceScorer` |
 

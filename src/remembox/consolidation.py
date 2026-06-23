@@ -9,9 +9,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 
-from membox._store import EpisodicStoreProtocol, SemanticStoreProtocol
-from membox.config import MemoryConfig
-from membox.models import Episode, Fact
+from remembox._store import EpisodicStoreProtocol, SemanticStoreProtocol
+from remembox.config import MemoryConfig
+from remembox.models import Episode, Fact
 
 
 class Consolidator(ABC):

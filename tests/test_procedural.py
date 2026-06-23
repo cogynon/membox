@@ -2,9 +2,9 @@
 
 import pytest
 
-from membox import Membox
-from membox.models import Procedure
-from membox.procedural import ProceduralStore
+from remembox import Remembox
+from remembox.models import Procedure
+from remembox.procedural import ProceduralStore
 
 
 class TestProceduralStore:
@@ -52,10 +52,10 @@ class TestProceduralStore:
         assert store.delete(proc.id) is False
 
 
-class TestMemboxProcedural:
+class TestRememboxProcedural:
 
     def test_learn_and_match_procedure(self):
-        memory = Membox(":memory:")
+        memory = Remembox(":memory:")
         proc = memory.learn_procedure("server outage", "Run diagnostics immediately", confidence=0.95)
         assert isinstance(proc, Procedure)
 
@@ -64,20 +64,20 @@ class TestMemboxProcedural:
         assert matches[0].action == "Run diagnostics immediately"
 
     def test_procedures_list(self):
-        memory = Membox(":memory:")
+        memory = Remembox(":memory:")
         memory.learn_procedure("a", "do A")
         memory.learn_procedure("b", "do B")
         assert len(memory.procedures()) == 2
 
     def test_context_includes_active_procedures(self):
-        memory = Membox(":memory:")
+        memory = Remembox(":memory:")
         memory.learn_procedure("goodnight", "Dim lights, set alarm", confidence=0.9)
         ctx = memory.context("Goodnight Jarvis")
         assert "Active Procedures" in ctx
         assert "Dim lights" in ctx
 
     def test_stats_includes_procedures(self):
-        memory = Membox(":memory:")
+        memory = Remembox(":memory:")
         memory.learn_procedure("x", "do X")
         stats = memory.stats()
         assert stats["procedures"]["total"] == 1

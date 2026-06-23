@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox import Membox, MemoryConfig, RuleBasedSummarizer, Summarizer
-from membox.models import Episode
-from membox.summarization import (
+from remembox import Remembox, MemoryConfig, RuleBasedSummarizer, Summarizer
+from remembox.models import Episode
+from remembox.summarization import (
     _find_cut_index,
     estimate_tokens,
     serialize_episodes,
@@ -16,7 +16,7 @@ from membox.summarization import (
 NOW = datetime(2026, 6, 21, 12, 0, 0)
 
 
-def _thread(m: Membox, thread_id: str, n: int, *, words: int = 200,
+def _thread(m: Remembox, thread_id: str, n: int, *, words: int = 200,
             start: datetime = NOW - timedelta(hours=50)) -> None:
     """Record n chunky episodes into one thread, oldest first."""
     for i in range(n):
@@ -89,14 +89,14 @@ class TestRuleBasedSummarizer:
 
 class TestSummarizeThread:
     def test_short_thread_is_noop(self):
-        m = Membox(":memory:")
+        m = Remembox(":memory:")
         m.record("only one", thread_id="t1", timestamp=NOW)
         result = m.summarize_thread("t1", now=NOW)
         assert not result.did_summarize
         assert result.summarized_ids == []
 
     def test_compresses_and_keeps_recent(self):
-        m = Membox(":memory:")
+        m = Remembox(":memory:")
         _thread(m, "t1", 12)
         result = m.summarize_thread("t1", now=NOW)
         assert result.did_summarize
@@ -109,7 +109,7 @@ class TestSummarizeThread:
         assert result.tokens_after < result.tokens_before
 
     def test_summary_episode_persisted_in_thread(self):
-        m = Membox(":memory:")
+        m = Remembox(":memory:")
         _thread(m, "t1", 12)
         result = m.summarize_thread("t1", now=NOW)
         summaries = [e for e in m.thread("t1") if e.source == "thread_summary"]
@@ -118,7 +118,7 @@ class TestSummarizeThread:
         assert summaries[0].context["summarized_count"] == len(result.summarized_ids)
 
     def test_repeated_summarization_compounds(self):
-        m = Membox(":memory:")
+        m = Remembox(":memory:")
         _thread(m, "t1", 12)
         m.summarize_thread("t1", now=NOW)
         # Add more and summarize again; prior summary should be folded in.
@@ -135,7 +135,7 @@ class TestSummarizeThread:
                           custom_instructions=None):
                 return f"CUSTOM::{len(episodes)}"
 
-        m = Membox(":memory:", summarizer=TaggingSummarizer())
+        m = Remembox(":memory:", summarizer=TaggingSummarizer())
         _thread(m, "t1", 12)
         result = m.summarize_thread("t1", now=NOW)
         assert result.summary_episode.content.startswith("CUSTOM::")
@@ -143,7 +143,7 @@ class TestSummarizeThread:
 
 class TestMaintain:
     def test_maintain_runs_all_steps(self):
-        m = Membox(":memory:")
+        m = Remembox(":memory:")
         m.record("User said: I prefer green tea",
                  timestamp=NOW - timedelta(hours=2))
         report = m.maintain(now=NOW)
@@ -155,7 +155,7 @@ class TestMaintain:
 
     def test_maintain_honors_auto_reflect(self):
         cfg = MemoryConfig(auto_reflect=True)
-        m = Membox(":memory:", config=cfg)
+        m = Remembox(":memory:", config=cfg)
         m.record("happy day", emotion="happy", timestamp=NOW - timedelta(days=2))
         report = m.maintain(now=NOW)
         assert "reflect" in report
@@ -163,14 +163,14 @@ class TestMaintain:
     def test_maintain_auto_summarizes_big_threads(self):
         cfg = MemoryConfig(summary_trigger_tokens=500,
                            summary_keep_recent_tokens=200)
-        m = Membox(":memory:", config=cfg)
+        m = Remembox(":memory:", config=cfg)
         _thread(m, "big", 12)
         report = m.maintain(now=NOW)
         assert len(report["summarized_threads"]) >= 1
 
     def test_maintain_skips_summary_when_disabled(self):
         cfg = MemoryConfig(summary_trigger_tokens=None)
-        m = Membox(":memory:", config=cfg)
+        m = Remembox(":memory:", config=cfg)
         _thread(m, "big", 12)
         report = m.maintain(now=NOW)
         assert report["summarized_threads"] == []

@@ -10,13 +10,13 @@ from __future__ import annotations
 import math
 from datetime import datetime
 
-from membox.config import MemoryConfig
-from membox.episodic import EpisodicStore
-from membox.models import Episode, RetrievalResult
-from membox.tokens import tokenize as _tokenize
+from remembox.config import MemoryConfig
+from remembox.episodic import EpisodicStore
+from remembox.models import Episode, RetrievalResult
+from remembox.tokens import tokenize as _tokenize
 
 if False:
-    from membox.embedding_store import EmbeddingStore
+    from remembox.embedding_store import EmbeddingStore
 
 
 def recency_score(episode: Episode, now: datetime,

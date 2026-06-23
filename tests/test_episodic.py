@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox.models import Episode
-from membox.episodic import EpisodicStore
+from remembox.models import Episode
+from remembox.episodic import EpisodicStore
 
 
 # ── Basic CRUD ──────────────────────────────────────────────────────

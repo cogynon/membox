@@ -1,13 +1,13 @@
-# membox
+# remembox
 
 **Production-grade plug-and-play memory for AI agents.**
 
 Give any LLM, agent, or rule-based system persistent episodic + semantic memory. Zero config, single-file storage, framework-agnostic.
 
 ```python
-from membox import Membox
+from remembox import Remembox
 
-memory = Membox("my_agent.db")
+memory = Remembox("my_agent.db")
 memory.record("User said they love hiking in the Himalayas", importance=0.8)
 memory.learn("user", "prefers", "black coffee", confidence=0.9)
 
@@ -43,10 +43,10 @@ context = memory.context("what does the user like?")
 
 ```bash
 # From source (development)
-git clone <repo-url> && cd membox
+git clone <repo-url> && cd remembox
 uv sync --extra dev
 
-# Coming soon: pip install membox
+# Coming soon: pip install remembox
 ```
 
 ## Quick Start
@@ -55,9 +55,9 @@ uv sync --extra dev
 ### 1. Record Events
 
 ```python
-from membox import Membox
+from remembox import Remembox
 
-memory = Membox("jarvis.db")
+memory = Remembox("jarvis.db")
 
 # Record what happens
 memory.record("User got promoted to Director of Engineering!", importance=1.0, emotion="ecstatic")
@@ -140,7 +140,7 @@ print(memory.stats())
 ## Configuration
 
 ```python
-from membox import Membox, MemoryConfig
+from remembox import Remembox, MemoryConfig
 
 # Custom config
 config = MemoryConfig(
@@ -150,11 +150,11 @@ config = MemoryConfig(
     w_importance=0.3,         # Retrieval weight: stored importance
     max_context_tokens=2000,  # Token budget for context()
 )
-memory = Membox("agent.db", config=config)
+memory = Remembox("agent.db", config=config)
 
 # Or use presets:
-fast_memory = Membox("chatbot.db", config=MemoryConfig.fast())    # Aggressive forgetting
-deep_memory = Membox("assistant.db", config=MemoryConfig.deep())  # Long retention
+fast_memory = Remembox("chatbot.db", config=MemoryConfig.fast())    # Aggressive forgetting
+deep_memory = Remembox("assistant.db", config=MemoryConfig.deep())  # Long retention
 ```
 
 ## Integration Examples
@@ -163,10 +163,10 @@ deep_memory = Membox("assistant.db", config=MemoryConfig.deep())  # Long retenti
 
 ```python
 from openai import OpenAI
-from membox import Membox
+from remembox import Remembox
 
 client = OpenAI()
-memory = Membox("openai_agent.db")
+memory = Remembox("openai_agent.db")
 
 def chat(user_message: str) -> str:
     # Store the user message
@@ -192,10 +192,10 @@ def chat(user_message: str) -> str:
 
 ```python
 import anthropic
-from membox import Membox
+from remembox import Remembox
 
 client = anthropic.Anthropic()
-memory = Membox("claude_agent.db")
+memory = Remembox("claude_agent.db")
 
 def chat(user_message: str) -> str:
     memory.record(f"User: {user_message}")
@@ -215,9 +215,9 @@ def chat(user_message: str) -> str:
 ### With Any Agent Framework
 
 ```python
-from membox import Membox
+from remembox import Remembox
 
-memory = Membox("agent.db")
+memory = Remembox("agent.db")
 
 # In your agent's observe/act loop:
 def agent_step(observation: str) -> str:
@@ -242,7 +242,7 @@ def agent_step(observation: str) -> str:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Membox                            │
+│                      Remembox                            │
 │                                                              │
 │  record()  recall()  learn()  context()  consolidate()      │
 │     │         │        │         │            │              │
@@ -263,7 +263,7 @@ def agent_step(observation: str) -> str:
 
 ## API Reference
 
-Grouped by memory type. All methods are on `Membox`.
+Grouped by memory type. All methods are on `Remembox`.
 
 | Category | Method | Returns |
 |---|---|---|

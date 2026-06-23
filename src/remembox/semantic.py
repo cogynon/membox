@@ -10,11 +10,11 @@ import json
 import sqlite3
 from datetime import datetime
 
-from membox.config import MemoryConfig
-from membox.connection import create_connection
-from membox.migrations import migrate
-from membox.models import Fact
-from membox.tokens import escape_like
+from remembox.config import MemoryConfig
+from remembox.connection import create_connection
+from remembox.migrations import migrate
+from remembox.models import Fact
+from remembox.tokens import escape_like
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS facts (

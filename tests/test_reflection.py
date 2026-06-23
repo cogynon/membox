@@ -2,9 +2,9 @@
 
 import pytest
 
-from membox import Membox
-from membox.models import Episode
-from membox.reflection import (
+from remembox import Remembox
+from remembox.models import Episode
+from remembox.reflection import (
     Reflection,
     ReflectionStore,
     RuleBasedReflectionExtractor,
@@ -14,7 +14,7 @@ from membox.reflection import (
 
 @pytest.fixture
 def memory(tmp_path):
-    m = Membox(str(tmp_path / "reflect.db"))
+    m = Remembox(str(tmp_path / "reflect.db"))
     yield m
     m.close()
 
@@ -62,8 +62,8 @@ class TestReflectionStore:
 
     def test_owner_isolation(self, tmp_path):
         db = tmp_path / "shared.db"
-        a = Membox(str(db), owner_id="alice")
-        b = Membox(str(db), owner_id="bob")
+        a = Remembox(str(db), owner_id="alice")
+        b = Remembox(str(db), owner_id="bob")
         a._reflection.record(Reflection(subject="user", predicate="p", object="v"))
         assert a._reflection.count() == 1
         assert b._reflection.count() == 0
@@ -93,7 +93,7 @@ class TestReflectFunction:
         assert len(rows[0].evidence) == 3
 
 
-class TestMemboxIntegration:
+class TestRememboxIntegration:
     def test_reflect_defaults_pull_recent(self, memory):
         for _ in range(5):
             memory.record("I love hiking", emotion="happy")

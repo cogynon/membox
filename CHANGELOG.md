@@ -1,4 +1,4 @@
-# Changelog — membox v0.2.0
+# Changelog — remembox v0.2.0
 
 > All changes merged into the main package (no longer isolated in `v2/`).
 Newest entries at the top. See [`BUGS.md`](BUGS.md) for the known-issues tracker.
@@ -6,6 +6,10 @@ Newest entries at the top. See [`BUGS.md`](BUGS.md) for the known-issues tracker
 ---
 
 ## Unreleased
+
+### Rename: membox → remembox
+
+- **Changed** Renamed the module and class from `membox`/`Membox` to `remembox`/`Remembox` across the entire codebase, including all source code, tests, docs, config, and demos.
 
 ### Docs: runnable notebooks + documentation index
 
@@ -313,7 +317,7 @@ Current: 262 passed, 19 skipped, 1 warning
 
 ## Repo Organization
 
-- `src/membox/` — production package
+- `src/remembox/` — production package
 - `tests/` — full test suite
 - `lessons/` — 8 lesson scripts (gitignored, not part of package)
 - `demos/` — `demo_openrouter.py` (gitignored, not part of package)

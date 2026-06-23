@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox.models import Episode
+from remembox.models import Episode
 
 # Check if sentence-transformers is available
 try:
@@ -15,7 +15,7 @@ except ImportError:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
 
 if SENTENCE_TRANSFORMERS_AVAILABLE:
-    from membox.embedding_store import EmbeddingStore
+    from remembox.embedding_store import EmbeddingStore
 
 
 @pytest.fixture

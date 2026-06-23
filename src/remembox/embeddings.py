@@ -2,25 +2,25 @@
 
 .. note::
     **Legacy / standalone module.** This ``EmbeddingIndex`` is an *in-memory*
-    alternative that is NOT wired into ``Membox``. The production path uses
-    :class:`membox.embedding_store.EmbeddingStore`, which persists
+    alternative that is NOT wired into ``Remembox``. The production path uses
+    :class:`remembox.embedding_store.EmbeddingStore`, which persists
     embeddings in SQLite and stays in sync with episodes (no orphaned vectors,
     survives restarts). Enable it by setting ``config.embedding_model_name``.
 
     Prefer ``EmbeddingStore`` for any real use. This module is kept only as a
     minimal standalone example; an ``EmbeddingIndex`` you build here will not be
-    updated when episodes are recorded or forgotten via ``Membox``.
+    updated when episodes are recorded or forgotten via ``Remembox``.
 
 This module upgrades keyword-based retrieval to true semantic search.
 It's optional — the core works without it. Install the extra:
 
     pip install sentence-transformers
 
-Usage (standalone, not synced with Membox):
-    from membox import Membox
-    from membox.embeddings import EmbeddingIndex
+Usage (standalone, not synced with Remembox):
+    from remembox import Remembox
+    from remembox.embeddings import EmbeddingIndex
 
-    memory = Membox("agent.db")
+    memory = Remembox("agent.db")
     index = EmbeddingIndex()
 
     # Index existing episodes
@@ -40,8 +40,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from membox.config import MemoryConfig
-from membox.models import Episode, RetrievalResult
+from remembox.config import MemoryConfig
+from remembox.models import Episode, RetrievalResult
 
 
 def _import_sentence_transformers():

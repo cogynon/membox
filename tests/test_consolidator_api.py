@@ -2,8 +2,8 @@
 
 import pytest
 
-from membox.models import Episode
-from membox.consolidation import Consolidator, RuleBasedConsolidator
+from remembox.models import Episode
+from remembox.consolidation import Consolidator, RuleBasedConsolidator
 
 
 class MetadataAwareConsolidator(Consolidator):

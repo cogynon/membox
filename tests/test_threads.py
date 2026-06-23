@@ -2,12 +2,12 @@
 
 import pytest
 
-from membox import Membox
+from remembox import Remembox
 
 
 @pytest.fixture
 def memory(tmp_path):
-    m = Membox(str(tmp_path / "threads.db"))
+    m = Remembox(str(tmp_path / "threads.db"))
     yield m
     m.close()
 
@@ -54,8 +54,8 @@ class TestThreadRecording:
 class TestThreadOwnerIsolation:
     def test_cannot_see_other_owner_thread(self, tmp_path):
         db = tmp_path / "shared.db"
-        alice = Membox(str(db), owner_id="alice")
-        bob = Membox(str(db), owner_id="bob")
+        alice = Remembox(str(db), owner_id="alice")
+        bob = Remembox(str(db), owner_id="bob")
         alice.record("x", thread_id="secret")
         assert alice.threads() == ["secret"]
         assert bob.threads() == []

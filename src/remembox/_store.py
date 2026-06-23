@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Iterator, Protocol, runtime_checkable
 
-from membox.models import Episode, Fact
+from remembox.models import Episode, Fact
 
 
 @runtime_checkable

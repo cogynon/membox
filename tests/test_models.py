@@ -3,8 +3,8 @@
 import json
 from datetime import datetime, timedelta
 
-from membox.models import Episode, Fact, RetrievalResult
-from membox.config import MemoryConfig
+from remembox.models import Episode, Fact, RetrievalResult
+from remembox.config import MemoryConfig
 
 
 # ── Episode ─────────────────────────────────────────────────────────

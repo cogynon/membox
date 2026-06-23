@@ -14,9 +14,9 @@ import sqlite3
 from datetime import datetime
 from typing import Optional
 
-from membox.connection import create_connection
-from membox.migrations import migrate
-from membox.models import Procedure
+from remembox.connection import create_connection
+from remembox.migrations import migrate
+from remembox.models import Procedure
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS procedures (

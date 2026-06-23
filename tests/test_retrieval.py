@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox.models import Episode, RetrievalResult
-from membox.config import MemoryConfig
-from membox.episodic import EpisodicStore
-from membox.retrieval import (
+from remembox.models import Episode, RetrievalResult
+from remembox.config import MemoryConfig
+from remembox.episodic import EpisodicStore
+from remembox.retrieval import (
     recency_score, relevance_score, score_episode, recall,
 )
 
@@ -213,9 +213,9 @@ class TestRecall:
         results = recall(store, "where is my passport", k=5, now=NOW)
         assert any("passport" in r.episode.content for r in results)
 
-    def test_min_score_via_membox(self):
-        from membox import Membox
-        memory = Membox(":memory:")
+    def test_min_score_via_remembox(self):
+        from remembox import Remembox
+        memory = Remembox(":memory:")
         memory.record("User likes coffee", importance=0.5)
         memory.record("User enjoys hiking", importance=0.5)
 

@@ -4,18 +4,18 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox import Membox
-from membox.config import MemoryConfig
-from membox.consolidation import RuleBasedConsolidator
-from membox.models import Episode, Procedure
-from membox.reflection import RuleBasedReflectionExtractor
+from remembox import Remembox
+from remembox.config import MemoryConfig
+from remembox.consolidation import RuleBasedConsolidator
+from remembox.models import Episode, Procedure
+from remembox.reflection import RuleBasedReflectionExtractor
 
 NOW = datetime(2026, 1, 1, 12, 0, 0)
 
 
 @pytest.fixture
 def memory():
-    m = Membox(":memory:")
+    m = Remembox(":memory:")
     yield m
     m.close()
 
@@ -92,7 +92,7 @@ class TestBug7And8Forgetting:
 
     def test_thread_summary_not_deleted(self):
         cfg = MemoryConfig(summary_trigger_tokens=50, summary_keep_recent_tokens=20)
-        m = Membox(":memory:", config=cfg)
+        m = Remembox(":memory:", config=cfg)
         old = NOW - timedelta(days=30)
         for i in range(10):
             m.record("chatter " + "x" * 40, importance=0.2,
@@ -157,7 +157,7 @@ class TestBug16IterAll:
 class TestBug26ConsolidateAll:
     def test_drains_backlog(self):
         cfg = MemoryConfig(consolidation_batch_size=5)
-        m = Membox(":memory:", config=cfg)
+        m = Remembox(":memory:", config=cfg)
         for i in range(23):
             m.record("I prefer item " + str(i),
                      timestamp=NOW - timedelta(hours=2))

@@ -5,11 +5,11 @@ from typing import Iterator
 
 import pytest
 
-from membox._store import EpisodicStoreProtocol, SemanticStoreProtocol
-from membox.config import MemoryConfig
-from membox.consolidation import consolidate
-from membox.forgetting import forget
-from membox.models import Episode, Fact
+from remembox._store import EpisodicStoreProtocol, SemanticStoreProtocol
+from remembox.config import MemoryConfig
+from remembox.consolidation import consolidate
+from remembox.forgetting import forget
+from remembox.models import Episode, Fact
 
 
 class FakeEpisodicStore(EpisodicStoreProtocol):

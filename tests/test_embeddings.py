@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox.models import Episode
-from membox.config import MemoryConfig
+from remembox.models import Episode
+from remembox.config import MemoryConfig
 
 NOW = datetime(2026, 3, 25, 12, 0, 0)
 
@@ -17,24 +17,24 @@ class TestCosineSimilarity:
     """Test the cosine similarity function without requiring sentence-transformers."""
 
     def test_identical_vectors(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         a = [1.0, 0.0, 0.0]
         assert abs(EmbeddingIndex._cosine_similarity(a, a) - 1.0) < 0.001
 
     def test_orthogonal_vectors(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         a = [1.0, 0.0]
         b = [0.0, 1.0]
         assert abs(EmbeddingIndex._cosine_similarity(a, b)) < 0.001
 
     def test_opposite_vectors(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         a = [1.0, 0.0]
         b = [-1.0, 0.0]
         assert EmbeddingIndex._cosine_similarity(a, b) < 0
 
     def test_zero_vector(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         assert EmbeddingIndex._cosine_similarity([0, 0], [1, 1]) == 0.0
 
 
@@ -58,7 +58,7 @@ requires_st = pytest.mark.skipif(
 class TestEmbeddingIndex:
 
     def test_add_and_query(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         index.add(Episode(content="I love hiking in the mountains", timestamp=NOW))
         index.add(Episode(content="Python is a great programming language", timestamp=NOW))
@@ -69,7 +69,7 @@ class TestEmbeddingIndex:
         assert "hiking" in results[0].episode.content.lower()
 
     def test_add_batch(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         episodes = [
             Episode(content=f"topic {i}", timestamp=NOW)
@@ -80,7 +80,7 @@ class TestEmbeddingIndex:
         assert len(index) == 10
 
     def test_no_duplicate_add(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         ep = Episode(content="test")
         index.add(ep)
@@ -88,7 +88,7 @@ class TestEmbeddingIndex:
         assert len(index) == 1
 
     def test_contains(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         ep = Episode(content="test")
         index.add(ep)
@@ -96,13 +96,13 @@ class TestEmbeddingIndex:
         assert "nonexistent" not in index
 
     def test_empty_query(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         results = index.query("anything", k=5, now=NOW)
         assert results == []
 
     def test_scores_include_components(self):
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         index.add(Episode(content="I enjoy coffee", timestamp=NOW, importance=0.8))
         results = index.query("coffee", k=1, now=NOW)
@@ -113,7 +113,7 @@ class TestEmbeddingIndex:
 
     def test_semantic_over_keyword(self):
         """Embedding search should find semantically similar, not just keyword matches."""
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         index.add(Episode(content="The dog is playing in the park", timestamp=NOW))
         index.add(Episode(content="Quarterly financial report due tomorrow", timestamp=NOW))
@@ -126,7 +126,7 @@ class TestEmbeddingIndex:
 
     def test_recency_affects_ranking(self):
         """Recent episode should rank higher than old one with same relevance."""
-        from membox.embeddings import EmbeddingIndex
+        from remembox.embeddings import EmbeddingIndex
         index = EmbeddingIndex()
         index.add(Episode(
             content="User ordered coffee",

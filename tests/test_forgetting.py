@@ -2,12 +2,12 @@
 
 from datetime import datetime, timedelta
 
-from membox.models import Episode
-from membox.config import MemoryConfig
-from membox.episodic import EpisodicStore
-from membox.semantic import SemanticStore
-from membox.forgetting import retention_score, evaluate_episode, forget
-from membox.consolidation import RuleBasedConsolidator, consolidate
+from remembox.models import Episode
+from remembox.config import MemoryConfig
+from remembox.episodic import EpisodicStore
+from remembox.semantic import SemanticStore
+from remembox.forgetting import retention_score, evaluate_episode, forget
+from remembox.consolidation import RuleBasedConsolidator, consolidate
 
 
 NOW = datetime(2026, 3, 25, 12, 0, 0)

@@ -4,10 +4,10 @@ import sqlite3
 
 import pytest
 
-from membox import Membox, MemoryConfig, Episode
-from membox.connection import create_connection
-from membox.episodic import EpisodicStore
-from membox.semantic import SemanticStore
+from remembox import Remembox, MemoryConfig, Episode
+from remembox.connection import create_connection
+from remembox.episodic import EpisodicStore
+from remembox.semantic import SemanticStore
 
 
 class TestInMemoryConnectionSharing:
@@ -26,9 +26,9 @@ class TestInMemoryConnectionSharing:
         assert ep._conn is shared
         assert sem._conn is shared
 
-    def test_memory_membox_creates_single_connection(self):
-        """Membox with :memory: should wire all stores to one DB."""
-        memory = Membox(":memory:", owner_id="alice")
+    def test_memory_remembox_creates_single_connection(self):
+        """Remembox with :memory: should wire all stores to one DB."""
+        memory = Remembox(":memory:", owner_id="alice")
         memory.record("Alice's event", importance=0.7)
         memory.learn("user", "name", "Alice", confidence=0.9)
 
@@ -39,12 +39,12 @@ class TestInMemoryConnectionSharing:
 
     def test_memory_deletion_cascade_no_missing_table(self):
         """EmbeddingStore cross-store delete_before must not crash in :memory:."""
-        memory = Membox(":memory:")
+        memory = Remembox(":memory:")
         ep = memory.record("event to delete")
         # Manually trigger the cross-store join path used by delete_before
         # via EmbeddingStore directly (it joins with episodes table)
         from datetime import datetime, timedelta
-        from membox.embedding_store import EmbeddingStore
+        from remembox.embedding_store import EmbeddingStore
 
         emb = EmbeddingStore(
             ":memory:",

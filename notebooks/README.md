@@ -1,6 +1,6 @@
 # Notebooks
 
-Interactive examples for `membox`. Part of the [repo documentation](../README.md#documentation) set.
+Interactive examples for `remembox`. Part of the [repo documentation](../README.md#documentation) set.
 
 | Notebook | Audience | Length |
 |----------|----------|--------|

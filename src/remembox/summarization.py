@@ -24,9 +24,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 
-from membox._store import EpisodicStoreProtocol
-from membox.config import MemoryConfig
-from membox.models import Episode
+from remembox._store import EpisodicStoreProtocol
+from remembox.config import MemoryConfig
+from remembox.models import Episode
 
 
 def estimate_tokens(text: str) -> int:

@@ -4,13 +4,13 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from membox import Membox
-from membox.models import Fact
+from remembox import Remembox
+from remembox.models import Fact
 
 
 @pytest.fixture
 def memory(tmp_path):
-    m = Membox(str(tmp_path / "temporal.db"))
+    m = Remembox(str(tmp_path / "temporal.db"))
     yield m
     m.close()
 

@@ -1,4 +1,4 @@
-"""Membox — the main facade. One class, one import, full memory system.
+"""Remembox — the main facade. One class, one import, full memory system.
 
 This is what users interact with. It wires together all internal modules
 (episodic, semantic, retrieval, forgetting, consolidation) behind a clean API.
@@ -11,18 +11,18 @@ from datetime import datetime
 
 import sqlite3
 
-from membox.config import MemoryConfig
-from membox.connection import create_connection
-from membox.consolidation import Consolidator, RuleBasedConsolidator, consolidate
-from membox.episodic import EpisodicStore
-from membox.forgetting import forget
-from membox.importance import ImportanceScorer, RuleBasedImportanceScorer
-from membox.models import Episode, Fact, Procedure, RetrievalResult
-from membox.procedural import ProceduralStore
-from membox.reflection import ReflectionStore, RuleBasedReflectionExtractor, reflect
-from membox.retrieval import recall
-from membox.semantic import SemanticStore
-from membox.summarization import (
+from remembox.config import MemoryConfig
+from remembox.connection import create_connection
+from remembox.consolidation import Consolidator, RuleBasedConsolidator, consolidate
+from remembox.episodic import EpisodicStore
+from remembox.forgetting import forget
+from remembox.importance import ImportanceScorer, RuleBasedImportanceScorer
+from remembox.models import Episode, Fact, Procedure, RetrievalResult
+from remembox.procedural import ProceduralStore
+from remembox.reflection import ReflectionStore, RuleBasedReflectionExtractor, reflect
+from remembox.retrieval import recall
+from remembox.semantic import SemanticStore
+from remembox.summarization import (
     Summarizer,
     ThreadSummaryResult,
     estimate_tokens,
@@ -30,7 +30,7 @@ from membox.summarization import (
 )
 
 if False:
-    from membox.embedding_store import EmbeddingStore
+    from remembox.embedding_store import EmbeddingStore
 
 
 # Single shared estimator (see summarization.estimate_tokens) so the context
@@ -38,12 +38,12 @@ if False:
 _estimate_tokens = estimate_tokens
 
 
-class Membox:
+class Remembox:
     """Production-grade memory for any AI agent.
 
     Plug into any LLM, agent framework, or rule-based system:
 
-        memory = Membox("my_agent.db")
+        memory = Remembox("my_agent.db")
         memory.record("User said they love hiking")
         results = memory.recall("hobbies", k=3)
         memory.learn("user", "prefers", "black coffee", confidence=0.9)
@@ -53,7 +53,7 @@ class Membox:
     All state persists across restarts.
     """
 
-    def __init__(self, db_path: str = "membox.db",
+    def __init__(self, db_path: str = "remembox.db",
                  config: MemoryConfig | None = None,
                  consolidator: Consolidator | None = None,
                  owner_id: str = "default",
@@ -81,7 +81,7 @@ class Membox:
         self._reflection = ReflectionStore(db_path, owner_id=owner_id, connection=shared_conn)
         self._consolidator = consolidator or RuleBasedConsolidator()
 
-        # Keep the shared connection alive as long as Membox owns it.
+        # Keep the shared connection alive as long as Remembox owns it.
         self._shared_memory_conn: sqlite3.Connection | None = shared_conn
 
         # Optional embedding store for semantic retrieval
@@ -94,7 +94,7 @@ class Membox:
                     self._config.embedding_model_name,
                     cache_folder=self._config.embedding_cache_dir,
                 )
-                from membox.embedding_store import EmbeddingStore
+                from remembox.embedding_store import EmbeddingStore
                 self._embedding_store = EmbeddingStore(
                     db_path=db_path,
                     owner_id=owner_id,
@@ -631,7 +631,7 @@ class Membox:
     def close(self) -> None:
         """Close database connections.
 
-        When using a shared in-memory connection, Membox owns the
+        When using a shared in-memory connection, Remembox owns the
         connection and closes it directly; the stores skip closing.
         """
         self._episodic.close()
@@ -652,5 +652,5 @@ class Membox:
     def __repr__(self) -> str:
         ep_count = self._episodic.count()
         fact_count = self._semantic.count()
-        return (f"Membox(owner='{self._owner_id}', episodes={ep_count}, "
+        return (f"Remembox(owner='{self._owner_id}', episodes={ep_count}, "
                 f"facts={fact_count}, db='{self._db_path}')")

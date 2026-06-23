@@ -10,12 +10,12 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 
-from membox.config import MemoryConfig
-from membox._store import EpisodicStoreProtocol
-from membox.models import Episode
+from remembox.config import MemoryConfig
+from remembox._store import EpisodicStoreProtocol
+from remembox.models import Episode
 
 if False:
-    from membox.embedding_store import EmbeddingStore
+    from remembox.embedding_store import EmbeddingStore
 
 
 @dataclass(slots=True)

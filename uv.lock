@@ -675,34 +675,6 @@ wheels = [
 ]
 
 [[package]]
-name = "membox"
-version = "0.2.0"
-source = { editable = "." }
-
-[package.optional-dependencies]
-dev = [
-    { name = "ipykernel" },
-    { name = "openai" },
-    { name = "pytest" },
-    { name = "pytest-benchmark" },
-    { name = "python-dotenv" },
-]
-embeddings = [
-    { name = "sentence-transformers" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=7.3.0" },
-    { name = "openai", marker = "extra == 'dev'", specifier = ">=2.29.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=4.0" },
-    { name = "python-dotenv", marker = "extra == 'dev'", specifier = ">=1.2.2" },
-    { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0" },
-]
-provides-extras = ["dev", "embeddings"]
-
-[[package]]
 name = "mpmath"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1403,6 +1375,34 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/e7/d8020e39414c93af7f0d8688eabcecece44abfd5ce314b21dfda0eebd3d8/regex-2026.2.28-cp314-cp314t-win_amd64.whl", hash = "sha256:6591f281cb44dc13de9585b552cec6fc6cf47fb2fe7a48892295ee9bc4a612f9", size = 284779, upload-time = "2026-02-28T02:19:38.625Z" },
     { url = "https://files.pythonhosted.org/packages/13/c0/ad225f4a405827486f1955283407cf758b6d2fb966712644c5f5aef33d1b/regex-2026.2.28-cp314-cp314t-win_arm64.whl", hash = "sha256:dee50f1be42222f89767b64b283283ef963189da0dda4a515aa54a5563c62dec", size = 275010, upload-time = "2026-02-28T02:19:40.65Z" },
 ]
+
+[[package]]
+name = "remembox"
+version = "0.2.0"
+source = { editable = "." }
+
+[package.optional-dependencies]
+dev = [
+    { name = "ipykernel" },
+    { name = "openai" },
+    { name = "pytest" },
+    { name = "pytest-benchmark" },
+    { name = "python-dotenv" },
+]
+embeddings = [
+    { name = "sentence-transformers" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=7.3.0" },
+    { name = "openai", marker = "extra == 'dev'", specifier = ">=2.29.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=4.0" },
+    { name = "python-dotenv", marker = "extra == 'dev'", specifier = ">=1.2.2" },
+    { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0" },
+]
+provides-extras = ["dev", "embeddings"]
 
 [[package]]
 name = "rich"

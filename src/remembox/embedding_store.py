@@ -17,9 +17,9 @@ import sqlite3
 from datetime import datetime
 from typing import Optional
 
-from membox.connection import create_connection
-from membox.migrations import migrate
-from membox.models import Episode
+from remembox.connection import create_connection
+from remembox.migrations import migrate
+from remembox.models import Episode
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS embeddings (
@@ -57,11 +57,11 @@ class EmbeddingStore:
     """SQLite-backed persistent embedding store.
 
     Guarantees that embeddings stay in sync with episodes:
-    - record()  → compute + store embedding atomically (via Membox)
+    - record()  → compute + store embedding atomically (via Remembox)
     - delete()  → remove embedding when episode is removed
     - All operations scoped by owner_id for multi-tenant safety.
 
-    Usage (internal — managed by Membox):
+    Usage (internal — managed by Remembox):
         store = EmbeddingStore("agent.db", owner_id="user1", model=model)
         store.add(episode)              # stores embedding
         sims = store.similarity(query_emb, k=5)  # semantic search
