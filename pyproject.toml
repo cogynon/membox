@@ -5,7 +5,7 @@ description = "Production-grade plug-and-play memory for AI agents. Zero config,
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-authors = [{ name = "cogynon", email = "cogynon@gmail.com" }]
+authors = [{ name = "cogynon", email = "cogynon@users.noreply.github.com" }]
 keywords = ["llm", "agents", "memory", "ai", "vector-search", "memory-system"]
 classifiers = [
     "Development Status :: 4 - Beta",
