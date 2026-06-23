@@ -1,5 +1,5 @@
 [project]
-name = "membox"
+name = "remembox"
 version = "0.2.0"
 description = "Production-grade plug-and-play memory for AI agents. Zero config, single-file storage, framework-agnostic."
 readme = "README.md"
