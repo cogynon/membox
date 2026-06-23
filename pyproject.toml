@@ -1,6 +1,6 @@
 [project]
 name = "remembox"
-version = "0.2.0"
+version = "0.2.1"
 description = "Production-grade plug-and-play memory for AI agents. Zero config, single-file storage, framework-agnostic."
 readme = "README.md"
 requires-python = ">=3.12"
