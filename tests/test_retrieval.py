@@ -3,10 +3,12 @@
 import math
 from datetime import datetime, timedelta
 
-from agentmemory.models import Episode, RetrievalResult
-from agentmemory.config import MemoryConfig
-from agentmemory.episodic import EpisodicStore
-from agentmemory.retrieval import (
+import pytest
+
+from membox.models import Episode, RetrievalResult
+from membox.config import MemoryConfig
+from membox.episodic import EpisodicStore
+from membox.retrieval import (
     recency_score, relevance_score, score_episode, recall,
 )
 
@@ -65,6 +67,13 @@ class TestRelevanceScore:
     def test_case_insensitive(self):
         assert relevance_score("Coffee", "COFFEE is great") > 0
 
+    def test_punctuation_does_not_break_tokens(self):
+        """Regression: trailing punctuation must not create a distinct token.
+        'coffee order' vs 'ordered a black coffee.' should still match on 'coffee'."""
+        assert relevance_score("coffee order", "User ordered a black coffee.") == 0.5
+        assert relevance_score("coffee!", "i love coffee") == 1.0
+        assert relevance_score("(coffee)", "coffee, please") == 1.0
+
 
 # ── Combined scoring ──────────────────────────────────────────────
 
@@ -82,11 +91,19 @@ class TestScoreEpisode:
         ep = Episode(content="User likes coffee", timestamp=NOW, importance=0.7)
         config = MemoryConfig()
         result = score_episode(ep, "coffee", NOW, config)
-        # Verify the combined score matches the weighted sum
+        # Verify the combined score is the weighted sum normalized by total weight.
+        total_weight = config.w_recency + config.w_relevance + config.w_importance
         expected = (config.w_recency * result.recency +
                     config.w_relevance * result.relevance +
-                    config.w_importance * result.importance)
+                    config.w_importance * result.importance) / total_weight
         assert abs(result.score - expected) < 0.001
+
+    def test_score_is_normalized_for_custom_weights(self):
+        ep = Episode(content="perfect match on every axis", timestamp=NOW, importance=1.0)
+        # Weights that sum to more than 1 — score should still be 1.0 for a perfect match.
+        config = MemoryConfig(w_recency=2.0, w_relevance=3.0, w_importance=5.0)
+        result = score_episode(ep, "perfect match on every axis", NOW, config)
+        assert result.score == pytest.approx(1.0, abs=0.001)
 
     def test_high_importance_boosts_score(self):
         low = Episode(content="X", timestamp=NOW, importance=0.1)
@@ -164,3 +181,43 @@ class TestRecall:
         store = self._seed_store()
         results = recall(store, "", k=3, now=NOW)
         assert len(results) <= 3  # Should not crash
+
+    def test_min_score_filters_weak_matches(self):
+        store = self._seed_store()
+        # A high threshold should filter out low-relevance results
+        results = recall(store, "quantum physics", k=5, min_score=0.3, now=NOW)
+        assert all(r.score >= 0.3 for r in results)
+
+    def test_min_score_can_return_empty(self):
+        store = self._seed_store()
+        # A very high threshold should produce no results
+        results = recall(store, "coffee", k=5, min_score=0.99, now=NOW)
+        assert results == []
+
+    def test_finds_match_on_non_first_query_word(self):
+        """Regression: recall must keyword-search EVERY query token, not just the
+        first word. A relevant old episode beyond the recent pool should be
+        reachable even when its matching word is not the first query word."""
+        store = EpisodicStore(":memory:")
+        # Flood the recent pool so the target is pushed out of recent(100).
+        for i in range(120):
+            store.record(Episode(
+                content=f"filler event number {i}",
+                timestamp=NOW - timedelta(hours=i + 1), importance=0.1,
+            ))
+        store.record(Episode(
+            content="I keep my passport in the study desk drawer.",
+            timestamp=NOW - timedelta(days=200), importance=0.9,
+        ))
+        # 'passport' is the LAST word of the query, and old/out-of-pool.
+        results = recall(store, "where is my passport", k=5, now=NOW)
+        assert any("passport" in r.episode.content for r in results)
+
+    def test_min_score_via_membox(self):
+        from membox import Membox
+        memory = Membox(":memory:")
+        memory.record("User likes coffee", importance=0.5)
+        memory.record("User enjoys hiking", importance=0.5)
+
+        results = memory.recall("coffee", k=5, min_score=0.5)
+        assert len(results) <= 1  # hiking match should likely be filtered

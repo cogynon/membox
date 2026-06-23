@@ -1,8 +1,8 @@
 """Tests for semantic store: learn, reinforce, contradict, search, persistence."""
 
-from agentmemory.models import Fact
-from agentmemory.config import MemoryConfig
-from agentmemory.semantic import SemanticStore
+from membox.models import Fact
+from membox.config import MemoryConfig
+from membox.semantic import SemanticStore
 
 
 # ── Basic learn ─────────────────────────────────────────────────────

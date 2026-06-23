@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from agentmemory.models import Episode
-from agentmemory.episodic import EpisodicStore
+from membox.models import Episode
+from membox.episodic import EpisodicStore
 
 
 # ── Basic CRUD ──────────────────────────────────────────────────────

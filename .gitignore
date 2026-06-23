@@ -8,3 +8,20 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Educational materials (not part of package)
+lessons/
+demos/
+
+# v2 development artifacts
+v2/
+
+# Local session exports
+pi-session-*.html
+
+# Secrets
+.env
+.env.*
+
+# macOS metadata
+.DS_Store
